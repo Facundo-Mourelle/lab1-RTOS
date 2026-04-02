@@ -12,6 +12,6 @@ Dichas subramas son **"Desafio_X"**.
 
 ### Instalación y ejecución
 
->[!note] Se incluyen los binarios compilados ejecutables, por lo que es posible ejecutar directamente el código en las placas
+> [!NOTE] Se incluyen los binarios compilados ejecutables, por lo que es posible ejecutar directamente el código en las placas
 
 Para compilar manualmente el proyecto se utiliza *arm-none-eabi-gcc*, y para facilitar la compilación se utiliza la herramienta [bear](https://github.com/rizsotto/Bear) con el comando `bear -- make`
