@@ -1,0 +1,7 @@
+CompileFlags:
+  Add: [
+    "-target", "arm-none-eabi",
+    "--sysroot=/usr/arm-none-eabi",
+    "-I/usr/arm-none-eabi/include"
+  ]
+  Compiler: arm-none-eabi-gcc
