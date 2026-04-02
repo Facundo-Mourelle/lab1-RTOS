@@ -23,16 +23,29 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "FreeRTOS.h"
+#include "stm32f4xx_hal_gpio.h"
+#include "task.h"
+#include "semphr.h"
+#include <stdint.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+typedef struct {
+  uint16_t leds;
+  uint32_t delay_ms;
+} blinkParams_t;
 
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define LED0 GPIO_PIN_0
+#define LED1 GPIO_PIN_1
+#define LED2 GPIO_PIN_2
+#define LED3 GPIO_PIN_3
+#define LED_PORT GPIOA
 
 /* USER CODE END PD */
 
@@ -44,18 +57,30 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+static blinkParams_t led1_params = {LED0, 200};
+static blinkParams_t led2_params = {LED1, 400};
+static blinkParams_t led3_params = {LED2, 600};
+static blinkParams_t led4_params = {LED3, 800};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
+void vLedTask(void *pvParameters);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void vLedTask(void *pvParameters){
+
+  blinkParams_t *params = (blinkParams_t *) pvParameters;
+  for (;;) {
+    HAL_GPIO_TogglePin(LED_PORT,params->leds);
+    HAL_Delay(params->delay_ms);
+  }
+
+}
 
 /* USER CODE END 0 */
 
@@ -90,6 +115,10 @@ int main(void)
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
 
+  xTaskCreate(vLedTask, "led1", 128, &led1_params, 0, NULL);
+  xTaskCreate(vLedTask, "led2", 128, &led2_params, 0, NULL);
+  xTaskCreate(vLedTask, "led3", 128, &led3_params, 0, NULL);
+  xTaskCreate(vLedTask, "led4", 128, &led4_params, 0, NULL);
   /* USER CODE END 2 */
 
   /* Init scheduler */
