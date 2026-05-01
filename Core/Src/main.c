@@ -23,7 +23,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "semphr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,18 +33,26 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define LED1_PIN  GPIO_PIN_12
+#define LED2_PIN  GPIO_PIN_13
+#define LED3_PIN  GPIO_PIN_14
+#define LED4_PIN  GPIO_PIN_15
+#define LED_PORT  GPIOD
 
+#define STEP_MS   150u
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+/* Cambiar tipo de delay */
+#define DELAY(ms)   HAL_Delay(ms)
+/* #define DELAY(ms)   vTaskDelay(pdMS_TO_TICKS(ms)) */
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+static SemaphoreHandle_t xMutexLEDs = NULL;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -56,7 +64,57 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void vTareaA(void *pvParameters)
+{
+    (void)pvParameters;
+    const uint16_t leds[] = { LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN };
+    for (;;)
+    {
+        xSemaphoreTake(xMutexLEDs, portMAX_DELAY);
+        /*seccion critica */
+        for (int i = 0; i < 4; i++)
+        {
+            HAL_GPIO_WritePin(LED_PORT,
+                              LED1_PIN|LED2_PIN|LED3_PIN|LED4_PIN,
+                              GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(LED_PORT, leds[i], GPIO_PIN_SET);
+            DELAY(STEP_MS);
+        }
+        HAL_GPIO_WritePin(LED_PORT,
+                          LED1_PIN|LED2_PIN|LED3_PIN|LED4_PIN,
+                          GPIO_PIN_RESET);
 
+        xSemaphoreGive(xMutexLEDs);
+
+        /*fuera de seccion critica*/
+        DELAY(STEP_MS);
+    }
+}
+
+void vTareaB(void *pvParameters)
+{
+    (void)pvParameters;
+    for (;;)
+    {
+        xSemaphoreTake(xMutexLEDs, portMAX_DELAY);
+        /* seccion critica */
+        for (int i = 0; i < 4; i++)
+        {
+            HAL_GPIO_WritePin(LED_PORT,
+                              LED1_PIN|LED2_PIN|LED3_PIN|LED4_PIN,
+                              GPIO_PIN_SET);
+            DELAY(STEP_MS);
+            HAL_GPIO_WritePin(LED_PORT,
+                              LED1_PIN|LED2_PIN|LED3_PIN|LED4_PIN,
+                              GPIO_PIN_RESET);
+            DELAY(STEP_MS);
+        }
+
+        xSemaphoreGive(xMutexLEDs);
+
+        DELAY(STEP_MS);
+    }
+}
 /* USER CODE END 0 */
 
 /**
