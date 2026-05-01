@@ -20,11 +20,9 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "gpio.h"
-#include "semphr.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "semphr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
